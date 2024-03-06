@@ -1,0 +1,64 @@
+ - program input
+ 	- path of the file containing records need to be sorted
+ 	- path of the file containing sorted records
+ 	- size of each record
+ 	- size of each record key
+ 	- available memory for sorting
+ 	- order of sorted data (1 for ascending)
+ 
+ - sample input:
+	 - a file contains 2000000 records
+	 - each record is 100 bytes
+	 	- first 8 bytes is the key
+	 	- key is used for comparsion (lexicographic order)
+	 - 32 MB = 32000000 bytes available memory
+	 - assume the size of each buffer is the same as a record (100 bytes)
+	 	- # buffer = 32000000 / 100 = 320000
+	 - pass 0:
+	 	- # sorted runs = 2000000 / 320000 = 7
+	 	- the first 6 sorted runs will contain 320000 records
+	 	- the last sorted run will contain 2000000 % 320000 = 80000 records
+	 - pass 1:
+	 	- 319999 input buffers
+	 	- 1 output buffer
+	 	
+- sample run:
+	- break the input file into blocks
+		- # of buffers = available memory / size of each record
+		- # of blocks = ceiling(# of records / # of buffers)
+	- block_sizes = [# of blocks]
+	- block_sizes[0..# of blocks - 2] = # of buffers
+	- block_sizes[# of blocks - 1] = # of records % # of buffers
+	- sort records in each block and write each block of records to disk (tmp file)
+	
+	- # of passes = ceiling(log_(# of buffers - 1)(ceiling(# of records / # of buffers)))
+	- for each pass
+		- read the tmp file
+		- # of new blocks = ceiling(# of blocks / (# of buffers - 1))
+		- new_block_sizes = [# of new blocks]
+		- # of blocks to merge = # of blocks
+		- i = 0
+		- while i < # of new blocks
+			- n = min(# of blocks to merge, # of buffers)
+			- new_block_sizes[i] = merge blocks i to i + n - 1 (given block_sizes) into one block and write it to new tmp file
+			- # of blocks to merge = # of blocks to merge - n
+			- i = i + 1
+		- block_sizes = new_block_sizes
+		- # of blocks = # of new blocks
+		- remove tmp file
+
+			
+	- merge blocks from i to i + n - 1 (given block_sizes) into one block
+		- block_sizes = [32, 32, 32, 32, 32, 32, 32, 8]
+		- start_block = i
+		- # of blocks to merge = n
+		- 
+		
+
+
+
+
+
+
+	
+ 
