@@ -8,6 +8,11 @@
 
 using namespace std;
 
+// GLOBALS
+long KEY_SIZE;
+int SORTING_ORDER;
+long SIZE_OF_REC;
+
 size_t get_num_blocks(long num_of_entities, size_t num_of_buffers)
 {
     double n = static_cast<double>(num_of_entities) / num_of_buffers;
@@ -31,9 +36,9 @@ void remove_file(const string &filename)
     }
 }
 
-vector<size_t> pass0(string in_file, string out_file, int amt_of_mem, long record_size, size_t &num_of_buffers, long &num_of_records)
+vector<size_t> pass0(string in_file, string out_file, int amt_of_mem, size_t &num_of_buffers, long &num_of_records)
 {
-    FileSorter<Record<100>> sorter(in_file, out_file, amt_of_mem);
+    FileSorter<Record> sorter(in_file, out_file, amt_of_mem);
     num_of_records = sorter.GetNumRecords();
     num_of_buffers = sorter.GetBufferSize();
     long num_of_blocks = get_num_blocks(num_of_records, num_of_buffers);
@@ -56,7 +61,7 @@ vector<size_t> pass0(string in_file, string out_file, int amt_of_mem, long recor
     return block_sizes;
 }
 
-size_t merge_blocks(FileSorter<Record<100>> &sorter, vector<size_t> block_sizes, size_t start_block, size_t num_of_blocks_to_merge)
+size_t merge_blocks(FileSorter<Record> &sorter, vector<size_t> block_sizes, size_t start_block, size_t num_of_blocks_to_merge)
 {
     size_t start_record = 0;
     for (size_t i = 0; i < start_block; i++)
@@ -76,7 +81,7 @@ size_t merge_blocks(FileSorter<Record<100>> &sorter, vector<size_t> block_sizes,
 
 vector<size_t> pass(string in_file, string out_file, int amt_of_mem, vector<size_t> block_sizes)
 {
-    FileSorter<Record<100>> sorter(in_file, out_file, amt_of_mem);
+    FileSorter<Record> sorter(in_file, out_file, amt_of_mem);
     size_t num_of_blocks = block_sizes.size();
 
     size_t num_of_buffers = sorter.GetBufferSize();
@@ -95,14 +100,10 @@ vector<size_t> pass(string in_file, string out_file, int amt_of_mem, vector<size
     return new_block_sizes;
 }
 
-long key_size;
-int sorting_order;
-
 int main(int argc, char **argv)
 {
     string in_file_name;
     string out_file_name;
-    long record_size = 0;
     int amt_of_mem = 0; // amount of available memory in MB
 
     argv++;
@@ -112,34 +113,34 @@ int main(int argc, char **argv)
     out_file_name = argv[0];
 
     argv++;
-    record_size = atol(argv[0]);
+    SIZE_OF_REC = atol(argv[0]);
 
     argv++;
-    key_size = atol(argv[0]);
+    KEY_SIZE = atol(argv[0]);
 
     argv++;
     amt_of_mem = atoi(argv[0]);
 
     argv++;
-    sorting_order = atoi(argv[0]);
+    SORTING_ORDER = atoi(argv[0]);
 
     size_t num_of_buffers;
     long num_of_records;
 
     string tmp_file_name = "pass0.dat";
-    vector<size_t> block_sizes = pass0(in_file_name, tmp_file_name, amt_of_mem, record_size, num_of_buffers, num_of_records);
+    vector<size_t> block_sizes = pass0(in_file_name, tmp_file_name, amt_of_mem, num_of_buffers, num_of_records);
     int num_of_passes = get_num_passes(num_of_records, num_of_buffers);
 
     for (int i = 0; i < num_of_passes - 1; i++)
     {
         string tmp_outfile_name = "pass" + to_string(i + 1) + ".dat";
         block_sizes = pass(tmp_file_name, tmp_outfile_name, amt_of_mem, block_sizes);
-        // remove_file(tmp_file_name);
+        remove_file(tmp_file_name);
         tmp_file_name = tmp_outfile_name;
     }
 
     pass(tmp_file_name, out_file_name, amt_of_mem, block_sizes);
-    // remove_file(tmp_file_name);
+    remove_file(tmp_file_name);
 
     return 0;
 }

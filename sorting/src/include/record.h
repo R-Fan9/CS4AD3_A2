@@ -6,35 +6,38 @@
 
 using namespace std;
 
-extern long key_size;
+extern long KEY_SIZE;
+extern long SIZE_OF_REC;
 
-template <unsigned SizeOfRec>
 class Record
 {
 private:
-    char m_chdata[SizeOfRec]; // Data for record contained here
+    char *m_chdata;
 
 public:
     // Constructor
-    Record()
+    Record() : m_chdata(new char[SIZE_OF_REC])
     {
         // Initialize m_chdata with zeros
-        memset(m_chdata, 0, SizeOfRec);
+        memset(m_chdata, 0, SIZE_OF_REC);
     }
 
-    Record(FILE *file)
+    Record(FILE *file) : m_chdata(new char[SIZE_OF_REC])
     {
-        fread(m_chdata, 1, SizeOfRec, file);
+        fread(m_chdata, 1, SIZE_OF_REC, file);
     }
 
     // Destructor
-    ~Record() {}
+    ~Record()
+    {
+        delete[] m_chdata;
+    }
 
     // Copy constructor
-    Record(const Record &other)
+    Record(const Record &other) : m_chdata(new char[SIZE_OF_REC])
     {
         // Copy data from other object
-        memcpy(m_chdata, other.m_chdata, SizeOfRec);
+        memcpy(m_chdata, other.m_chdata, SIZE_OF_REC);
     }
 
     // Assignment operator
@@ -43,8 +46,9 @@ public:
         // Check for self-assignment
         if (this != &other)
         {
-            // Copy data from other object
-            memcpy(m_chdata, other.m_chdata, SizeOfRec);
+            delete[] m_chdata;
+            m_chdata = new char[SIZE_OF_REC];
+            memcpy(m_chdata, other.m_chdata, SIZE_OF_REC);
         }
         return *this;
     }
@@ -52,7 +56,7 @@ public:
     // Size function
     long size()
     {
-        return SizeOfRec;
+        return SIZE_OF_REC;
     }
 
     // Operator[] for accessing data
@@ -60,12 +64,16 @@ public:
     {
         return m_chdata[index];
     }
+
+    const char *data() const
+    {
+        return m_chdata;
+    }
 };
 
-template <unsigned SizeOfRec>
-bool operator==(const Record<SizeOfRec> &r1, const Record<SizeOfRec> &r2)
+bool operator==(const Record &r1, const Record &r2)
 {
-    for (long i = 0; i < key_size; ++i)
+    for (long i = 0; i < KEY_SIZE; ++i)
     {
         if (r1[i] != r2[i])
         {
@@ -75,11 +83,10 @@ bool operator==(const Record<SizeOfRec> &r1, const Record<SizeOfRec> &r2)
     return true;
 }
 
-template <unsigned SizeOfRec>
-bool operator<(const Record<SizeOfRec> &r1, const Record<SizeOfRec> &r2)
+bool operator<(const Record &r1, const Record &r2)
 {
     // Compare the keys of the two records lexicographically
-    for (long i = 0; i < key_size; i++)
+    for (long i = 0; i < KEY_SIZE; i++)
     {
         if (r1[i] < r2[i])
         {
@@ -95,8 +102,7 @@ bool operator<(const Record<SizeOfRec> &r1, const Record<SizeOfRec> &r2)
     return false;
 };
 
-template <unsigned SizeOfRec>
-bool operator>(const Record<SizeOfRec> &r1, const Record<SizeOfRec> &r2)
+bool operator>(const Record &r1, const Record &r2)
 {
     return !(r1 < r2 || r1 == r2);
 };

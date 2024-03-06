@@ -10,7 +10,8 @@
 
 using namespace std;
 
-extern int sorting_order;
+extern int SORTING_ORDER;
+extern long SIZE_OF_REC;
 
 template <typename Rec>
 struct RecWithBlockIndex
@@ -120,7 +121,7 @@ long FileSorter<Rec>::CountRecords(string &inFile)
 template <typename Rec>
 Rec FileSorter<Rec>::ReadRecord(size_t index)
 {
-    fseek(m_h_inpfile, index * sizeof(Rec), SEEK_SET);
+    fseek(m_h_inpfile, index * SIZE_OF_REC, SEEK_SET);
     Rec record(m_h_inpfile);
     return record;
 }
@@ -128,8 +129,8 @@ Rec FileSorter<Rec>::ReadRecord(size_t index)
 template <typename Rec>
 void FileSorter<Rec>::WriteRecord(size_t index, Rec value)
 {
-    fseek(m_h_outfile, index * sizeof(Rec), SEEK_SET);
-    fwrite(&value, sizeof(Rec), 1, m_h_outfile);
+    fseek(m_h_outfile, index * SIZE_OF_REC, SEEK_SET);
+    fwrite(value.data(), SIZE_OF_REC, 1, m_h_outfile);
 }
 
 template <typename Rec>
@@ -156,7 +157,7 @@ RecWithBlockIndex<Rec> FileSorter<Rec>::CreateRecWithBlockIndex(const Rec &value
 template <typename Rec>
 size_t FileSorter<Rec>::GetBufferSize()
 {
-    return static_cast<size_t>(m_i_amt_of_mem) * 1024 * 1024 / sizeof(Rec);
+    return static_cast<size_t>(m_i_amt_of_mem) * 1024 * 1024 / (SIZE_OF_REC * 1.5);
 }
 
 template <typename Rec>
@@ -164,18 +165,14 @@ int FileSorter<Rec>::TwoPassMergeSort(long i, long j)
 {
     vector<Rec> buffer(GetBufferSize());
 
-    fseek(m_h_inpfile, i * sizeof(Rec), SEEK_SET);
-
-    long num_of_records = j - i + 1;
-
-    long records_read = fread(&buffer[0], sizeof(Rec), num_of_records, m_h_inpfile);
-    if (records_read <= 0)
+    long records_read = 0;
+    for (long cur_record_idx = i; cur_record_idx <= j; cur_record_idx++)
     {
-        perror(-2);
-        return -1;
+        Rec record = ReadRecord(cur_record_idx);
+        buffer[records_read++] = record;
     }
 
-    if (sorting_order == 1)
+    if (SORTING_ORDER == 1)
     {
         // sort in ascending order
         sort(buffer.begin(), buffer.begin() + records_read);
@@ -186,8 +183,10 @@ int FileSorter<Rec>::TwoPassMergeSort(long i, long j)
         sort(buffer.begin(), buffer.begin() + records_read, greater<Rec>());
     }
 
-    fseek(m_h_outfile, i * sizeof(Rec), SEEK_SET);
-    fwrite(&buffer[0], sizeof(Rec), records_read, m_h_outfile);
+    for (long cur_record_idx = i; cur_record_idx <= j; cur_record_idx++)
+    {
+        WriteRecord(cur_record_idx, buffer[cur_record_idx - i]);
+    }
 
     return 1;
 }
@@ -214,7 +213,7 @@ int FileSorter<Rec>::TwoPassMergeSort(
         return 1;
     }
 
-    Buffer<RecWithBlockIndex<Rec>> buffer(num_of_blocks_to_merge, sorting_order);
+    Buffer<RecWithBlockIndex<Rec>> buffer(num_of_blocks_to_merge, SORTING_ORDER);
 
     size_t current_block_indices[block_sizes.size()] = {0};
     size_t record_index = start_record;
