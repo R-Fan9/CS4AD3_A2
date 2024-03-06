@@ -33,7 +33,7 @@ void remove_file(const string &filename)
 
 vector<size_t> pass0(string in_file, string out_file, int amt_of_mem, long record_size, size_t &num_of_buffers, long &num_of_records)
 {
-    FileSorter<Record<99>> sorter(in_file, out_file, amt_of_mem);
+    FileSorter<Record<100>> sorter(in_file, out_file, amt_of_mem);
     num_of_records = sorter.GetNumRecords();
     num_of_buffers = sorter.GetBufferSize();
     long num_of_blocks = get_num_blocks(num_of_records, num_of_buffers);
@@ -56,7 +56,7 @@ vector<size_t> pass0(string in_file, string out_file, int amt_of_mem, long recor
     return block_sizes;
 }
 
-size_t merge_blocks(FileSorter<Record<99>> &sorter, vector<size_t> block_sizes, size_t start_block, size_t num_of_blocks_to_merge)
+size_t merge_blocks(FileSorter<Record<100>> &sorter, vector<size_t> block_sizes, size_t start_block, size_t num_of_blocks_to_merge)
 {
     size_t start_record = 0;
     for (size_t i = 0; i < start_block; i++)
@@ -76,7 +76,7 @@ size_t merge_blocks(FileSorter<Record<99>> &sorter, vector<size_t> block_sizes, 
 
 vector<size_t> pass(string in_file, string out_file, int amt_of_mem, vector<size_t> block_sizes)
 {
-    FileSorter<Record<99>> sorter(in_file, out_file, amt_of_mem);
+    FileSorter<Record<100>> sorter(in_file, out_file, amt_of_mem);
     size_t num_of_blocks = block_sizes.size();
 
     size_t num_of_buffers = sorter.GetBufferSize();
