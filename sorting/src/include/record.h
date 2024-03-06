@@ -53,12 +53,6 @@ public:
         return *this;
     }
 
-    // Size function
-    long size()
-    {
-        return SIZE_OF_REC;
-    }
-
     // Operator[] for accessing data
     const char &operator[](size_t index) const
     {

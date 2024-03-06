@@ -38,7 +38,7 @@ void remove_file(const string &filename)
 
 vector<size_t> pass0(string in_file, string out_file, int amt_of_mem, size_t &num_of_buffers, long &num_of_records)
 {
-    FileSorter<Record> sorter(in_file, out_file, amt_of_mem);
+    FileSorter<Record> sorter(in_file, out_file, amt_of_mem, SORTING_ORDER);
     num_of_records = sorter.GetNumRecords();
     num_of_buffers = sorter.GetBufferSize();
     long num_of_blocks = get_num_blocks(num_of_records, num_of_buffers);
@@ -81,7 +81,7 @@ size_t merge_blocks(FileSorter<Record> &sorter, vector<size_t> block_sizes, size
 
 vector<size_t> pass(string in_file, string out_file, int amt_of_mem, vector<size_t> block_sizes)
 {
-    FileSorter<Record> sorter(in_file, out_file, amt_of_mem);
+    FileSorter<Record> sorter(in_file, out_file, amt_of_mem, SORTING_ORDER);
     size_t num_of_blocks = block_sizes.size();
 
     size_t num_of_buffers = sorter.GetBufferSize();

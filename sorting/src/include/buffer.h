@@ -8,29 +8,29 @@ using namespace std;
 template <typename Rec>
 class Buffer
 {
-    priority_queue<Rec, vector<Rec>, greater<Rec>> min_heap;
-    priority_queue<Rec, vector<Rec>, less<Rec>> max_heap;
-    size_t max_size;
-    int sorting_order;
+    priority_queue<Rec, vector<Rec>, greater<Rec>> m_min_heap;
+    priority_queue<Rec, vector<Rec>, less<Rec>> m_max_heap;
+    size_t m_max_size;
+    int m_sorting_order;
 
 public:
-    Buffer(size_t size, int order) : max_size(size), sorting_order(order) {}
+    Buffer(size_t size, int order) : m_max_size(size), m_sorting_order(order) {}
 
     bool push(const Rec &val)
     {
-        if (sorting_order == 1)
+        if (m_sorting_order == 1)
         {
-            if (min_heap.size() < max_size)
+            if (m_min_heap.size() < m_max_size)
             {
-                min_heap.push(val);
+                m_min_heap.push(val);
                 return true;
             }
         }
         else
         {
-            if (max_heap.size() < max_size)
+            if (m_max_heap.size() < m_max_size)
             {
-                max_heap.push(val);
+                m_max_heap.push(val);
                 return true;
             }
         }
@@ -39,37 +39,37 @@ public:
 
     Rec top() const
     {
-        if (sorting_order == 1)
+        if (m_sorting_order == 1)
         {
-            return min_heap.top();
+            return m_min_heap.top();
         }
         else
         {
-            return max_heap.top();
+            return m_max_heap.top();
         }
     }
 
     void pop()
     {
-        if (sorting_order == 1)
+        if (m_sorting_order == 1)
         {
-            min_heap.pop();
+            m_min_heap.pop();
         }
         else
         {
-            max_heap.pop();
+            m_max_heap.pop();
         }
     }
 
     bool empty() const
     {
-        if (sorting_order == 1)
+        if (m_sorting_order == 1)
         {
-            return min_heap.empty();
+            return m_min_heap.empty();
         }
         else
         {
-            return max_heap.empty();
+            return m_max_heap.empty();
         }
     }
 };

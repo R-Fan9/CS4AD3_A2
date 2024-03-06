@@ -10,7 +10,6 @@
 
 using namespace std;
 
-extern int SORTING_ORDER;
 extern long SIZE_OF_REC;
 
 template <typename Rec>
@@ -39,6 +38,7 @@ class FileSorter
     FILE *m_h_outfile; // handle to output file
     long m_lnrecords;  // Number of records in file.
     int m_i_amt_of_mem;
+    int m_sorting_order;
 
     long CountRecords(string &inFile);
     Rec ReadRecord(size_t index);
@@ -47,7 +47,7 @@ class FileSorter
     RecWithBlockIndex<Rec> CreateRecWithBlockIndex(const Rec &value, size_t index);
 
 public:
-    FileSorter(string &inFile, string &outFile, int amt_of_mem);
+    FileSorter(string &inFile, string &outFile, int amt_of_mem, int sorting_order);
     ~FileSorter();
 
     int TwoPassMergeSort(long i, long j);
@@ -59,7 +59,7 @@ public:
 };
 
 template <typename Rec>
-FileSorter<Rec>::FileSorter(string &inFile, string &outFile, int amt_of_mem)
+FileSorter<Rec>::FileSorter(string &inFile, string &outFile, int amt_of_mem, int sorting_order)
 {
     // Open input file
     m_h_inpfile = fopen(inFile.c_str(), "rb");
@@ -81,6 +81,9 @@ FileSorter<Rec>::FileSorter(string &inFile, string &outFile, int amt_of_mem)
 
     // Set amount of memory
     m_i_amt_of_mem = amt_of_mem;
+
+    // Set sortinrg order
+    m_sorting_order = sorting_order;
 
     m_lnrecords = CountRecords(inFile);
 }
@@ -157,7 +160,7 @@ RecWithBlockIndex<Rec> FileSorter<Rec>::CreateRecWithBlockIndex(const Rec &value
 template <typename Rec>
 size_t FileSorter<Rec>::GetBufferSize()
 {
-    return static_cast<size_t>(m_i_amt_of_mem) * 1024 * 1024 / (SIZE_OF_REC * 1.5);
+    return static_cast<size_t>(m_i_amt_of_mem) * 1024 * 1024 / (SIZE_OF_REC * 2);
 }
 
 template <typename Rec>
@@ -172,7 +175,7 @@ int FileSorter<Rec>::TwoPassMergeSort(long i, long j)
         buffer[records_read++] = record;
     }
 
-    if (SORTING_ORDER == 1)
+    if (m_sorting_order == 1)
     {
         // sort in ascending order
         sort(buffer.begin(), buffer.begin() + records_read);
@@ -213,7 +216,7 @@ int FileSorter<Rec>::TwoPassMergeSort(
         return 1;
     }
 
-    Buffer<RecWithBlockIndex<Rec>> buffer(num_of_blocks_to_merge, SORTING_ORDER);
+    Buffer<RecWithBlockIndex<Rec>> buffer(num_of_blocks_to_merge, m_sorting_order);
 
     size_t current_block_indices[block_sizes.size()] = {0};
     size_t record_index = start_record;
