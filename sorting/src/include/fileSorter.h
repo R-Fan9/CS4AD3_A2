@@ -218,7 +218,7 @@ int FileSorter<Rec>::TwoPassMergeSort(
 
     Buffer<RecWithBlockIndex<Rec>> buffer(num_of_blocks_to_merge, m_sorting_order);
 
-    size_t current_block_indices[block_sizes.size()] = {0};
+    vector<size_t> current_block_indices(block_sizes.size(), 0);
     size_t record_index = start_record;
 
     // Populate the buffer with the first record on each block
