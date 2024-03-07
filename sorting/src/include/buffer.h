@@ -16,6 +16,14 @@ class Buffer
 public:
     Buffer(size_t size, int order) : m_max_size(size), m_sorting_order(order) {}
 
+    /**
+     * @brief Pushes a record onto the buffer
+     *
+     * If the sorting order is ascending (1), min-heap is used. Otherwise max-heap is used
+     *
+     * @param val The record to be pushed.
+     * @return True if the record was successfully pushed, false if the buffer is full.
+     */
     bool push(const Rec &val)
     {
         if (m_sorting_order == 1)
@@ -37,6 +45,11 @@ public:
         return false;
     }
 
+    /**
+     * @brief Returns the top element of the buffer.
+     *
+     * @return The top element based on the sorting order.
+     */
     Rec top() const
     {
         if (m_sorting_order == 1)
@@ -49,6 +62,9 @@ public:
         }
     }
 
+    /**
+     * @brief Removes the top element from the buffer.
+     */
     void pop()
     {
         if (m_sorting_order == 1)
@@ -61,6 +77,11 @@ public:
         }
     }
 
+    /**
+     * @brief Checks if the buffer is empty.
+     *
+     * @return True if the buffer is empty, otherwise false.
+     */
     bool empty() const
     {
         if (m_sorting_order == 1)
